@@ -1,0 +1,42 @@
+name: 'Sync to code'
+description: 'Often the configuration is chaged via GitHub UI. This action syncs back the chenges to code and creates a pull request.'
+inputs:
+  teams_dir:  
+    description: 'relative directory path where the teams YAML files are stored.'
+    required: false
+    default: 'teams'
+  github_token:
+    description: 'the GitHub token valid to write changes back to repository.'
+    required: true
+  github_org:
+    description: 'the GitHub organisation to be synchronized.'
+    required: true
+  branch_name:
+    description: 'the branch name for commit and pull request'
+    required: false
+    default: 'sync2code'
+    
+outputs:
+  pr-created:
+    description: 'The pull request reference created for the changes.'
+    value: ${{ steps.sync-to-code.outputs.pr-created }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+    - id: python-reqs-install
+      run: python -m pip install -U -r ${{ github.action_path }}/../requirements.txt
+      shell: bash
+    - id: sync-to-code
+      env: 
+        ACTION_REPO_ROOT: ${{ github.action_path }}/..
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_ORG: ${{ inputs.github_org }}
+        TEAMS_DIR: ${{ inputs.teams_dir }}
+        GITHUB_REPO: ${{ github.repository }}
+        GITHUB_BRANCH: ${{ inputs.branch_name }}
+      run: |
+        python ${{ github.action_path }}/sync2code.py
+      shell: bash
+    - run: echo "Related pull request ${{ steps.sync-to-code.outputs.pr-created }}"
+      shell: bash

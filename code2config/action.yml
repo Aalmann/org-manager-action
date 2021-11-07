@@ -1,0 +1,31 @@
+name: 'code to config'
+description: 'Push the team YAMLs code to config'
+inputs:
+  teams_dir:  
+    description: 'relative directory path where the teams YAML files are stored.'
+    required: false
+    default: 'teams'
+  github_token:
+    description: 'the GitHub token valid to write changes back to repository.'
+    required: true
+  github_org:
+    description: 'the GitHub organisation to be synchronized.'
+    required: true
+  
+    
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+    - id: python-reqs-install
+      run: python -m pip install -U -r ${{ github.action_path }}/../requirements.txt
+      shell: bash
+    - id: code-to-config
+      env: 
+        ACTION_REPO_ROOT: ${{ github.action_path }}/..
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_ORG: ${{ inputs.github_org }}
+        TEAMS_DIR: ${{ inputs.teams_dir }}
+      run: |
+        python ${{ github.action_path }}/code2config.py
+      shell: bash

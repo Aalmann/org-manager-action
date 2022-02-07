@@ -32,7 +32,7 @@ runs:
         ACTION_REPO_ROOT: ${{ github.action_path }}/..
         GITHUB_TOKEN: ${{ inputs.github_token }}
         GITHUB_ORG: ${{ inputs.github_org }}
-        TEAMS_DIR: ${{ inputs.teams_dir }}
+        GITHUB_REPO_DIR: .
         GITHUB_REPO: ${{ github.repository }}
         GITHUB_BRANCH: ${{ inputs.branch_name }}
       run: |

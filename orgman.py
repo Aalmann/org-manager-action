@@ -31,6 +31,7 @@ def _get_env_vars():
     vars['api_url']         = _get_env_or_raise("GITHUB_API_URL")
     vars['token']           = _get_env_or_raise("GITHUB_TOKEN")
     vars['org']             = _get_env_or_raise("GITHUB_ORG")
+    vars['repo']            = _get_env_or_raise("GITHUB_REPO")
     vars['repo_dir']        = _get_env_or_raise("GITHUB_REPO_DIR")
     vars['teams_dir']       = os.environ.get("TEAMS_DIR") or vars.get('repo_dir') + '/teams'
     vars['codeowners_dir']  = os.environ.get("CODEOWNERS_DIR") or vars.get('repo_dir')

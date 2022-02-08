@@ -66,7 +66,15 @@ def _gh_api_call(type, endpoint, data):
         print(data, flush=True)
         result = m(url, json=data, headers=headers, verify=verify, proxies=proxies)
         if result.status_code in [200, 201]:
-            return result.json()
+            ret = result.json()
+            page = 2
+            while 'next' in result.links.keys():
+                total = result.links['last']['url'].split('?')[-1].replace('page=', '')
+                print(f"Paginated result, trying to get next {page}/{total}", flush=True)
+                result = m(result.links['next']['url'], headers=headers, verify=verify, proxies=proxies)
+                page = page + 1
+                ret.extend(result.json())
+            return ret
         elif result.status_code == 204:
             print("Status code 204, no content", flush=True)
             return
@@ -84,14 +92,10 @@ def get_org_members():
     org  = vars.get("org")
     org_members = []
     org_maintainers = []
-    members = []
-    page = 1
-    while(page < 100):
-        members = _gh_api_call('get', f"/orgs/{org}/members", {'per_page': 100, 'page': page})
-        org_members.extend(i.get('login') for i in members)
-        page += 1
-        if len(members) < 100:
-            break
+    
+    members = _gh_api_call('get', f"/orgs/{org}/members", {'per_page': 100})
+    org_members.extend(i.get('login') for i in members)
+      
     
     return org_members
 
@@ -99,14 +103,9 @@ def get_existing_teams():
     vars = _get_env_vars()
     org  = vars.get("org")
     all_teams = []
-    teams = []
-    page = 1
-    while(page < 100):
-        teams = _gh_api_call('get', f"/orgs/{org}/teams", {'per_page': 100, 'page': page})
-        all_teams.extend(teams)
-        page += 1
-        if len(teams) < 100:
-            break
+    
+    teams = _gh_api_call('get', f"/orgs/{org}/teams", {'per_page': 100})
+    all_teams.extend(teams)
     
     return all_teams
 
@@ -202,6 +201,10 @@ def dump_codeowners(teams):
     vars = _get_env_vars()
     teams_dir = vars.get('teams_dir').replace(vars.get('repo_dir'), '')
     codeowners = vars.get('codeowners_dir') + os.path.sep + 'CODEOWNERS'
+    
+    if not os.path.exists(vars.get('codeowners_dir')):
+        os.mkdir(vars.get('codeowners_dir'))
+    
     with open(codeowners, 'w+') as f:
         f.write("##############################################################\n")
         f.write("# CODEOWNERS file use for automated pull_request assignments #\n")
@@ -308,4 +311,4 @@ if __name__ == "__main__":
     dump_existing_teams(teams)
     dump_codeowners(teams)
     dump_no_team_members(org_members, teams)
-    apply_teams()
+    #apply_teams()

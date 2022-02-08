@@ -34,7 +34,7 @@ def _get_env_vars():
     vars['repo']            = _get_env_or_raise("GITHUB_REPO")
     vars['repo_dir']        = _get_env_or_raise("GITHUB_REPO_DIR")
     vars['teams_dir']       = os.environ.get("TEAMS_DIR") or vars.get('repo_dir') + '/teams'
-    vars['codeowners_dir']  = os.environ.get("CODEOWNERS_DIR") or vars.get('repo_dir')
+    vars['codeowners_dir']  = os.environ.get("CODEOWNERS_DIR") or vars.get('repo_dir') + '/.github'
     vars['branch']          = os.environ.get('GITHUB_BRANCH', "sync2code")
     vars['https_proxy']     = os.environ.get('HTTPS_PROXY')
     vars['http_proxy']      = os.environ.get('HTTP_PROXY')
